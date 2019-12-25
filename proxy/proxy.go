@@ -45,6 +45,15 @@ func buildURL() (*url.URL, error) {
 	return url, err
 }
 
+func (t ProxyServer) GetDownstreamURL() *url.URL {
+	newURL, err := buildURL()
+	if err != nil {
+		fmt.Fprint(t.response, err)
+	}
+
+	return newURL
+}
+
 // ServeHTTP forward the call to the server downstream
 func (t ProxyServer) ServeHTTP() {
 	t.setDefaultHeaders()
@@ -63,6 +72,7 @@ func (t ProxyServer) ServeHTTP() {
 
 	t.response.WriteHeader(response.StatusCode)
 	io.Copy(t.response, response.Body)
+	fmt.Printf("Request forwarded to downstream server: %v\n", t.GetDownstreamURL())
 }
 
 func (t ProxyServer) setDefaultHeaders() {
