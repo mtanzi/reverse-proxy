@@ -1,67 +1,71 @@
 package proxy
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
-)
+	"regexp"
 
-const (
-	downstreamURL  = "http://127.0.0.1"
-	downstreamPort = "1333"
+	"github.com/mtanzi/reverse-proxy/config"
 )
 
 // ProxyServer is the reverse proxy struct
 type ProxyServer struct {
-	downstreamURL url.URL
-	response      http.ResponseWriter
-	request       *http.Request
+	response http.ResponseWriter
+	request  *http.Request
 }
 
 // NewProxyServer return a new ProxyServer
 func NewProxyServer(res http.ResponseWriter, req *http.Request) (t *ProxyServer) {
-	newURL, err := buildURL()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	t = &ProxyServer{
-		downstreamURL: *newURL,
-		response:      res,
-		request:       req,
+		response: res,
+		request:  req,
 	}
-	return
+	return t
 }
 
-func buildURL() (*url.URL, error) {
-	defaultURL := getEnv("DOWNSTREAM_URL", "http://127.0.0.1")
-	defaultPort := getEnv("DOWNSTREAM_PORT", "1333")
-	url, err := url.Parse(defaultURL + ":" + defaultPort)
+func buildURL(path string) (*url.URL, error) {
+	var defaultPort string
+	newConfig := config.InitConfig()
+
+	for _, rule := range newConfig.Rules {
+		rex := regexp.MustCompile(rule.Matcher)
+		match := rex.FindStringSubmatch(path)
+
+		if len(match) == 0 {
+			if defaultPort == "" {
+				defaultPort = newConfig.DefaultPort
+			}
+		} else {
+			defaultPort = rule.DownstreamPort
+		}
+	}
+
+	defaultURL := newConfig.DefaultURL
+	url, err := url.Parse("http://" + defaultURL + ":" + defaultPort)
 
 	return url, err
 }
 
-func (t ProxyServer) GetDownstreamURL() *url.URL {
-	newURL, err := buildURL()
-	if err != nil {
-		fmt.Fprint(t.response, err)
-	}
-
-	return newURL
-}
-
 // ServeHTTP forward the call to the server downstream
 func (t ProxyServer) ServeHTTP() {
-	t.setDefaultHeaders()
+	newURL, err := buildURL(t.request.URL.Path)
+	if err != nil {
+		t.response.WriteHeader(http.StatusInternalServerError)
+		log.Fatal(t.response, err)
+		return
+	}
+
+	t.setDefaultHeaders(*newURL)
+	log.Printf("Forwarding request to: %v \n", newURL)
 
 	response, err := http.DefaultClient.Do(t.request)
 	if err != nil {
 		t.response.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(t.response, err)
+		log.Fatal(t.response, err)
 		return
 	}
 
@@ -72,13 +76,12 @@ func (t ProxyServer) ServeHTTP() {
 
 	t.response.WriteHeader(response.StatusCode)
 	io.Copy(t.response, response.Body)
-	fmt.Printf("Request forwarded to downstream server: %v\n", t.GetDownstreamURL())
 }
 
-func (t ProxyServer) setDefaultHeaders() {
-	t.request.Host = t.downstreamURL.Host
-	t.request.URL.Host = t.downstreamURL.Host
-	t.request.URL.Scheme = t.downstreamURL.Scheme
+func (t ProxyServer) setDefaultHeaders(downstreamURL url.URL) {
+	t.request.Host = downstreamURL.Host
+	t.request.URL.Host = downstreamURL.Host
+	t.request.URL.Scheme = downstreamURL.Scheme
 	t.request.RequestURI = ""
 }
 
