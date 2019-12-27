@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -26,7 +27,9 @@ func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handleRequestAndRedirect)
-	if err := http.ListenAndServeTLS(getListenAddress(), "server.crt", "server.key", nil); err != nil {
+
+	log.Printf("Server listening on... https://localhost%v\n", getListenAddress())
+	if err := http.ListenAndServeTLS(getListenAddress(), "certs/server.crt", "certs/server.key", nil); err != nil {
 		panic(err)
 	}
 }
