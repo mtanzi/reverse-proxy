@@ -6,10 +6,12 @@ import (
 	"os"
 
 	"github.com/mtanzi/reverse-proxy/cmd"
+	"github.com/mtanzi/reverse-proxy/config"
 	"github.com/mtanzi/reverse-proxy/proxy"
 )
 
 var command cmd.Cmd
+var cfg config.Config
 
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
@@ -28,12 +30,14 @@ func getListenAddress() string {
 }
 
 func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
-	t := proxy.NewProxyServer(res, req)
+	t := proxy.NewProxyServer(res, req, cfg)
 	t.ServeHTTP()
 }
 
 func main() {
 	command = cmd.ParseCmd()
+	cfg = config.InitConfig()
+
 	http.HandleFunc("/", handleRequestAndRedirect)
 
 	if command.SSL == "true" {

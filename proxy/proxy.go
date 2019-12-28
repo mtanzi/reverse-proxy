@@ -14,13 +14,15 @@ import (
 
 // ProxyServer is the reverse proxy struct
 type ProxyServer struct {
+	config   config.Config
 	response http.ResponseWriter
 	request  *http.Request
 }
 
 // NewProxyServer return a new ProxyServer
-func NewProxyServer(res http.ResponseWriter, req *http.Request) (t *ProxyServer) {
+func NewProxyServer(res http.ResponseWriter, req *http.Request, cfg config.Config) (t *ProxyServer) {
 	t = &ProxyServer{
+		config:   cfg,
 		response: res,
 		request:  req,
 	}
