@@ -1,37 +1,37 @@
 package config
 
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+)
+
 // Config is the struct for the
 type Config struct {
-	DefaultURL  string
-	DefaultPort string
-	Rules       []Rule
+	DefaultURL  string `json:"default_url"`
+	DefaultPort string `json:"default_port"`
+	Rules       []Rule `json:"rules"`
 }
 
 // Rule define the struct for a single rule
 type Rule struct {
-	Matcher        string
-	DownstreamPort string
+	Matcher        string `json:"matcher"`
+	DownstreamPort string `json:"downstream_port"`
 }
 
 // InitConfig initialise the configuration
-func InitConfig() Config {
-	defaultURL := "localhost"
-	defaultPort := "1333"
-
-	rules := []Rule{
-		Rule{
-			Matcher:        "/marco",
-			DownstreamPort: "1331",
-		},
-		Rule{
-			Matcher:        "/catarina",
-			DownstreamPort: "1332",
-		},
+func InitConfig(configPath string) Config {
+	file, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return Config{
-		DefaultURL:  defaultURL,
-		DefaultPort: defaultPort,
-		Rules:       rules,
+	var config Config
+
+	err = json.Unmarshal([]byte(file), &config)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	return config
 }
