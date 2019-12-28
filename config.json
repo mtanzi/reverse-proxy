@@ -1,0 +1,14 @@
+{
+  "default_url": "localhost",
+  "default_port": "1333",
+  "rules": [
+    {
+      "matcher": "/marco",
+			"downstream_port": "1331"
+    },
+    {
+      "matcher": "/catarina",
+			"downstream_port": "1332"
+    }
+  ]
+}

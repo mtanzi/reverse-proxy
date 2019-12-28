@@ -29,24 +29,24 @@ func NewProxyServer(res http.ResponseWriter, req *http.Request, cfg config.Confi
 	return t
 }
 
-func buildURL(path string) (*url.URL, error) {
+func (t ProxyServer) buildURL() (*url.URL, error) {
 	var defaultPort string
-	newConfig := config.InitConfig()
+	// newConfig := config.InitConfig()
 
-	for _, rule := range newConfig.Rules {
+	for _, rule := range t.config.Rules {
 		rex := regexp.MustCompile(rule.Matcher)
-		match := rex.FindStringSubmatch(path)
+		match := rex.FindStringSubmatch(t.request.URL.Path)
 
 		if len(match) == 0 {
 			if defaultPort == "" {
-				defaultPort = newConfig.DefaultPort
+				defaultPort = t.config.DefaultPort
 			}
 		} else {
 			defaultPort = rule.DownstreamPort
 		}
 	}
 
-	defaultURL := newConfig.DefaultURL
+	defaultURL := t.config.DefaultURL
 	url, err := url.Parse("http://" + defaultURL + ":" + defaultPort)
 
 	return url, err
@@ -54,7 +54,7 @@ func buildURL(path string) (*url.URL, error) {
 
 // ServeHTTP forward the call to the server downstream
 func (t ProxyServer) ServeHTTP() {
-	newURL, err := buildURL(t.request.URL.Path)
+	newURL, err := t.buildURL()
 	if err != nil {
 		t.response.WriteHeader(http.StatusInternalServerError)
 		log.Fatal(t.response, err)

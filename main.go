@@ -10,6 +10,12 @@ import (
 	"github.com/mtanzi/reverse-proxy/proxy"
 )
 
+const (
+	defaultConfigPath = "config.json"
+	portSSL           = "443"
+	portDefault       = "8080"
+)
+
 var command cmd.Cmd
 var cfg config.Config
 
@@ -21,9 +27,9 @@ func getEnv(key, fallback string) string {
 }
 
 func getListenAddress() string {
-	var port = "443"
+	var port = portSSL
 	if command.SSL == "false" {
-		port = "8080"
+		port = portDefault
 	}
 
 	return ":" + port
@@ -34,9 +40,18 @@ func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	t.ServeHTTP()
 }
 
+func configPath() string {
+	path := command.ConfigPath
+	if path == "" {
+		return defaultConfigPath
+	}
+
+	return path
+}
+
 func main() {
 	command = cmd.ParseCmd()
-	cfg = config.InitConfig()
+	cfg = config.InitConfig(configPath())
 
 	http.HandleFunc("/", handleRequestAndRedirect)
 
