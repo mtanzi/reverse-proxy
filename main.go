@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	defaultConfigPath = "config.json"
-	portSSL           = "443"
-	portDefault       = "8080"
+	portSSL     = "443"
+	portDefault = "8080"
 )
 
 var command cmd.Cmd
@@ -23,18 +22,9 @@ func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	t.ServeHTTP()
 }
 
-func configPath() string {
-	path := command.ConfigPath
-	if path == "" {
-		return defaultConfigPath
-	}
-
-	return path
-}
-
 func main() {
 	command = cmd.ParseCmd()
-	cfg = config.InitConfig(configPath())
+	cfg = config.InitConfig(command.ConfigPath)
 
 	http.HandleFunc("/", handleRequestAndRedirect)
 

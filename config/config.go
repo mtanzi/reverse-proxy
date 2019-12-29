@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+const defaultConfigPath = "config.json"
+
 // Config is the struct for the
 type Config struct {
 	SSL         bool   `json:"ssl"`
@@ -22,6 +24,11 @@ type Rule struct {
 
 // InitConfig initialise the configuration
 func InitConfig(configPath string) Config {
+	// When the config path is not passed we set as default the `defaultConfigPath`
+	if configPath == "" {
+		configPath = defaultConfigPath
+	}
+
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatal(err)
