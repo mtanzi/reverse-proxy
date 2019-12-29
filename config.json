@@ -4,11 +4,11 @@
   "default_port": "1333",
   "rules": [
     {
-      "matcher": "/marco",
+      "matcher": "/auth",
 			"downstream_port": "1331"
     },
     {
-      "matcher": "/catarina",
+      "matcher": "/main",
 			"downstream_port": "1332"
     }
   ]
