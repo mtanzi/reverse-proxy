@@ -26,15 +26,6 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func getListenAddress() string {
-	var port = portSSL
-	if command.SSL == "false" {
-		port = portDefault
-	}
-
-	return ":" + port
-}
-
 func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	t := proxy.NewProxyServer(res, req, cfg)
 	t.ServeHTTP()
@@ -55,14 +46,14 @@ func main() {
 
 	http.HandleFunc("/", handleRequestAndRedirect)
 
-	if command.SSL == "true" {
-		log.Printf("Server listening on... https://localhost%v\n", getListenAddress())
-		if err := http.ListenAndServeTLS(getListenAddress(), "certs/server.crt", "certs/server.key", nil); err != nil {
+	if cfg.SSL == true {
+		log.Printf("Server listening on... https://localhost:%v\n", portSSL)
+		if err := http.ListenAndServeTLS(":"+portSSL, "certs/server.crt", "certs/server.key", nil); err != nil {
 			log.Fatal("ListenAndServeTLS: ", err)
 		}
 	} else {
-		log.Printf("Server listening on... http://localhost%v\n", getListenAddress())
-		if err := http.ListenAndServe(getListenAddress(), nil); err != nil {
+		log.Printf("Server listening on... http://localhost:%v\n", portDefault)
+		if err := http.ListenAndServe(":"+portDefault, nil); err != nil {
 			log.Fatal("ListenAndServe: ", err)
 		}
 	}

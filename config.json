@@ -1,4 +1,5 @@
 {
+  "ssl": true,
   "default_url": "localhost",
   "default_port": "1333",
   "rules": [

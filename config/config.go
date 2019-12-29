@@ -8,6 +8,7 @@ import (
 
 // Config is the struct for the
 type Config struct {
+	SSL         bool   `json:"ssl"`
 	DefaultURL  string `json:"default_url"`
 	DefaultPort string `json:"default_port"`
 	Rules       []Rule `json:"rules"`
