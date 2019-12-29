@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/mtanzi/reverse-proxy/cmd"
 	"github.com/mtanzi/reverse-proxy/config"
@@ -18,13 +17,6 @@ const (
 
 var command cmd.Cmd
 var cfg config.Config
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
 
 func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	t := proxy.NewProxyServer(res, req, cfg)
