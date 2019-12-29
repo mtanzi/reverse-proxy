@@ -8,7 +8,7 @@
 			"downstream_port": "1331"
     },
     {
-      "matcher": "/main",
+      "matcher": "/api",
 			"downstream_port": "1332"
     }
   ]
