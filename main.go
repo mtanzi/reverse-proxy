@@ -14,8 +14,10 @@ const (
 	portDefault = "8080"
 )
 
-var command cmd.Cmd
-var cfg config.Config
+var (
+	command cmd.Cmd
+	cfg     config.Config
+)
 
 func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	t := proxy.NewProxyServer(res, req, cfg)
