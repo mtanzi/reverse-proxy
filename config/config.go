@@ -12,14 +12,15 @@ const defaultConfigPath = "config.json"
 type Config struct {
 	SSL         bool   `json:"ssl"`
 	DefaultURL  string `json:"default_url"`
-	DefaultPort string `json:"default_port"`
+	DefaultPort int64  `json:"default_port"`
 	Rules       []Rule `json:"rules"`
 }
 
 // Rule define the struct for a single rule
 type Rule struct {
 	Matcher        string `json:"matcher"`
-	DownstreamPort string `json:"downstream_port"`
+	DownstreamURL  string `json:"downstream_url"`
+	DownstreamPort int64  `json:"downstream_port"`
 }
 
 // InitConfig initialise the configuration

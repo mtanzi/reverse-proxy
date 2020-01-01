@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 
 	"github.com/mtanzi/reverse-proxy/config"
 )
@@ -30,24 +31,35 @@ func NewProxyServer(res http.ResponseWriter, req *http.Request, cfg config.Confi
 }
 
 func (t ProxyServer) buildURL() (*url.URL, error) {
-	var defaultPort string
-	// newConfig := config.InitConfig()
+	var defaultPort int64
+	var defaultURL string
 
 	for _, rule := range t.config.Rules {
 		rex := regexp.MustCompile(rule.Matcher)
 		match := rex.FindStringSubmatch(t.request.URL.Path)
 
 		if len(match) == 0 {
-			if defaultPort == "" {
+			if defaultPort == 0 {
 				defaultPort = t.config.DefaultPort
+			}
+			if defaultURL == "" {
+				defaultURL = t.config.DefaultURL
 			}
 		} else {
 			defaultPort = rule.DownstreamPort
+			if defaultPort == 0 {
+				defaultPort = t.config.DefaultPort
+			}
+
+			defaultURL = rule.DownstreamURL
+			if defaultURL == "" {
+				defaultURL = t.config.DefaultURL
+			}
 		}
 	}
 
-	defaultURL := t.config.DefaultURL
-	url, err := url.Parse("http://" + defaultURL + ":" + defaultPort)
+	downstreamPort := strconv.FormatInt(int64(defaultPort), 10)
+	url, err := url.Parse("http://" + defaultURL + ":" + downstreamPort)
 
 	return url, err
 }

@@ -1,15 +1,16 @@
 {
   "ssl": true,
   "default_url": "localhost",
-  "default_port": "1333",
+  "default_port": 1333,
   "rules": [
     {
       "matcher": "/auth",
-			"downstream_port": "1331"
+      "downstream_url": "192.168.1.101",
+			"downstream_port": 1331
     },
     {
       "matcher": "/api",
-			"downstream_port": "1332"
+			"downstream_port": 1332
     }
   ]
 }
